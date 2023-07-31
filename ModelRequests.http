@@ -1,0 +1,60 @@
+### Сохранить Model
+POST http://localhost:8095/model
+
+{
+    "id":"1",
+    "method":"save",
+    "params":{
+        "request":{
+            "name":"<mongo name>",
+            "comment":"<mongo comment>",
+            "classMongoId":"<classMongoId>"
+        }
+    }
+}
+
+### Получить Model по mongoId
+POST http://localhost:8095/model
+
+{
+    "id":1,
+    "method":"fetchById",
+    "params":{
+        "id": "<modelMongoId>"
+    }
+}
+
+### Получить все Model
+POST http://localhost:8095/model
+
+{
+    "id":"1",
+    "method":"getAll"
+}
+
+### Обновить Model
+POST http://localhost:8095/model
+
+{
+    "id":"1",
+    "method":"update",
+    "params":{
+        "request":{
+            "id":"<modelMongoId>",
+            "name":"<new mongo name>",
+            "comment":"<new mongo comment>",
+            "classMongoId":"<newClassMongoId>"
+        }
+    }
+}
+
+### Удалить Model по mongoId
+POST http://localhost:8095/model
+
+{
+    "id":"1",
+    "method":"delete",
+    "params":{
+        "id":"<modelMongoId>"
+    }
+}

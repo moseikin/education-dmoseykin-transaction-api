@@ -1,0 +1,57 @@
+### Сохранить Class
+POST http://localhost:8095/class
+
+{
+    "id":"1",
+    "method":"save",
+    "params":{
+        "request":{
+            "mongoId":"<classMongoId>",
+            "title":"<class title>"
+        }
+    }
+}
+
+### Получить Class по mongoId
+POST http://localhost:8095/class
+
+{
+    "id":1,
+    "method":"getByMongoId",
+    "params":{
+        "mongoId": "<classMongoId>"
+    }
+}
+
+### Получить все Class
+POST http://localhost:8095/class
+
+{
+    "id":"1",
+    "method":"getAll"
+}
+
+### Обновить Class
+POST http://localhost:8095/class
+
+{
+    "id":"1",
+    "method":"update",
+    "params":{
+        "request":{
+            "mongoId":"<classMongoId>",
+            "title":"<new class title>"
+        }
+    }
+}
+
+### Удалить Class по mongoId
+POST http://localhost:8095/class
+
+{
+    "id":"1",
+    "method":"delete",
+    "params":{
+        "mongoId":"<classMongoId>"
+    }
+}
