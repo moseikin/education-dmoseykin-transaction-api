@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ModelLinkResponse {
 
+    private Long id;
+
     private String mongoId;
 
     private String title;

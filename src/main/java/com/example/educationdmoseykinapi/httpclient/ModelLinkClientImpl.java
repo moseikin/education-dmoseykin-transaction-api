@@ -1,20 +1,13 @@
 package com.example.educationdmoseykinapi.httpclient;
 
-import com.example.educationdmoseykinapi.dto.jsonrpc.ModelLinkRpcListResponseDto;
-import com.example.educationdmoseykinapi.dto.jsonrpc.ModelLinkRpcResponseDto;
-import com.example.educationdmoseykinapi.dto.jsonrpc.RpcRequestDto;
 import com.example.educationdmoseykinapi.dto.model.ModelLinkRequest;
 import com.example.educationdmoseykinapi.dto.model.ModelLinkResponse;
+import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,78 +20,50 @@ public class ModelLinkClientImpl implements ModelLinkClient {
     private static final String MODEL_LINK_METHOD_GET_ALL = "getAll";
     private static final String MODEL_LINK_METHOD_UPDATE = "update";
     private static final String MODEL_LINK_METHOD_DELETE = "delete";
-    private static final String DEFAULT_MESSAGE_ID = "1";
-
-    private final RestTemplate restTemplate;
 
     @Override
     public ModelLinkResponse save(ModelLinkRequest modelLinkRequest) {
-        RpcRequestDto rpcRequestDto = createRpcRequestDto(MODEL_LINK_METHOD_SAVE, Collections.singletonList(modelLinkRequest));
-        return makeRequest(rpcRequestDto);
+        return makeRequest(modelLinkRequest, MODEL_LINK_METHOD_SAVE);
     }
 
     @Override
     public ModelLinkResponse getByMongoId(String id) {
-        RpcRequestDto rpcRequestDto = createRpcRequestDto(MODEL_LINK_METHOD_GET, Collections.singletonList(id));
-        return makeRequest(rpcRequestDto);
+        return makeRequest(id, MODEL_LINK_METHOD_GET);
 
     }
 
     @Override
     public List<ModelLinkResponse> getAll() {
-        RpcRequestDto rpcRequestDto = createRpcRequestDto(MODEL_LINK_METHOD_GET_ALL, null);
-        return makeRequestForList(rpcRequestDto);
+        return makeRequestForList();
     }
 
     @Override
     public ModelLinkResponse update(ModelLinkRequest modelLinkRequest) {
-        RpcRequestDto rpcRequestDto = createRpcRequestDto(MODEL_LINK_METHOD_UPDATE, Collections.singletonList(modelLinkRequest));
-        return makeRequest(rpcRequestDto);
+        return makeRequest(modelLinkRequest, MODEL_LINK_METHOD_UPDATE);
     }
 
     @Override
     public void delete(String id) {
-        RpcRequestDto rpcRequestDto = createRpcRequestDto(MODEL_LINK_METHOD_DELETE, Collections.singletonList(id));
-        makeRequest(rpcRequestDto);
+        makeRequest(id, MODEL_LINK_METHOD_DELETE);
     }
 
-    private RpcRequestDto createRpcRequestDto(String method, List<Object> params) {
-        return new RpcRequestDto(DEFAULT_MESSAGE_ID, method, params);
-    }
-
-    public ModelLinkResponse makeRequest(RpcRequestDto rpcRequestDto) {
+    private ModelLinkResponse makeRequest(Object request, String methodName) {
         try {
-            ResponseEntity<ModelLinkRpcResponseDto> responseEntity = restTemplate.exchange(new URI(MODEL_LINK_SERVICE_URI),
-                    HttpMethod.POST,
-                    new HttpEntity<>(rpcRequestDto),
-                    ModelLinkRpcResponseDto.class);
-            return getResponse(responseEntity.getBody());
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e.getMessage());
+            JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(new URL(MODEL_LINK_SERVICE_URI));
+            return jsonRpcHttpClient.invoke(methodName, Collections.singletonList(request), ModelLinkResponse.class);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw new IllegalStateException();
         }
     }
 
-    private ModelLinkResponse getResponse(ModelLinkRpcResponseDto modelLinkRpcResponseDto) {
-        return modelLinkRpcResponseDto != null
-                ? modelLinkRpcResponseDto.getResult()
-                : new ModelLinkResponse();
-    }
-
-    private List<ModelLinkResponse> makeRequestForList(RpcRequestDto rpcRequestDto) {
+    private List<ModelLinkResponse> makeRequestForList() {
         try {
-            ResponseEntity<ModelLinkRpcListResponseDto> responseEntity = restTemplate.exchange(new URI(MODEL_LINK_SERVICE_URI),
-                    HttpMethod.POST,
-                    new HttpEntity<>(rpcRequestDto),
-                    ModelLinkRpcListResponseDto.class);
-            return getModelLinkResponses(responseEntity.getBody());
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
-    }
+            JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(new URL(MODEL_LINK_SERVICE_URI));
+            return Arrays.asList(jsonRpcHttpClient.invoke(MODEL_LINK_METHOD_GET_ALL, null, ModelLinkResponse[].class));
+        } catch (Throwable throwable) {
 
-    private List<ModelLinkResponse> getModelLinkResponses(ModelLinkRpcListResponseDto modelLinkRpcListResponseDto) {
-        return modelLinkRpcListResponseDto != null
-                ? modelLinkRpcListResponseDto.getResult()
-                : new ArrayList<>();
+            throw new IllegalStateException(throwable.getMessage());
+        }
     }
 }
